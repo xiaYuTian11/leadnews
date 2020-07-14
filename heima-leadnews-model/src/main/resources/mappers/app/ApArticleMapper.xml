@@ -30,45 +30,42 @@
     publish_time,sync_status
   </sql>
 
-    <select id="loadArticleListByLocation" resultMap="resultMap">
-        select <include refid="Base_Column_List"/>
-        from ap_article  aa
-        <where>
-            <if test="dto.provinceId != null">
-                and aa.province_id = #{dto.provinceId}
-            </if>
-            <if test="dto.cityId != null">
-                and aa.city_id = #{dto.cityId}
-            </if>
-            <if test="dto.countyId != null">
-                and aa.county_id = #{dto.countyId}
-            </if>
-            <if test="type != null and type ==1">
-                and aa.publish_time <![CDATA[<]]>  #{dto.minBehotTime}
-            </if>
-
-            <if test="type != null and type ==2">
-                and aa.publish_time <![CDATA[>]]>  #{dto.maxBehotTime}
-            </if>
-
-            <if test="dto.tag!= '__all__'">
-                and aa.channel_id = #{dto.tag}
-            </if>
-
-        </where>
-        limit #{dto.size}
-    </select>
+   <select id="loadArticleListByLocation" resultMap="resultMap">
+       select <include refid="Base_Column_List"/> from ap_article as a
+       <where>
+           <if test="dto.provinceId !=null ">
+               and a.province_id = #{dto.provinceId}
+           </if>
+           <if test="dto.cityId!=null">
+               and a.city_id=#{dto.cityId}
+           </if>
+           <if test="dto.countyId!=null">
+               and a.county_id=#{dto.countyId}
+           </if>
+           <!-- loadmore -->
+           <if test="type != null and type == 1">
+               and a.publish_time <![CDATA[<]]> #{dto.minBehotTime}
+           </if>
+           <if test="type != null and type == 2">
+               and a.publish_time <![CDATA[>]]> #{dto.maxBehotTime}
+           </if>
+           <if test="dto.tag != '__all__'">
+               and a.channel_id = #{dto.tag}
+           </if>
+       </where>
+       limit #{dto.size}
+   </select>
 
     <select id="loadArticleListByIdList" resultMap="resultMap">
-       select
-        <include refid="Base_Column_List" />
-        from ap_article
-       where id in (
-        <trim suffix="" suffixOverrides=",">
-            <foreach collection="list" item="item" separator=",">
-                #{item.articleId}
-            </foreach>
-        </trim>
-       )
+        select <include refid="Base_Column_List"/> from ap_article as a
+        <where>
+            id in (
+            <trim prefix="" suffixOverrides=",">
+               <foreach collection="list" item="item" separator=",">
+                   #{item.articleId}
+               </foreach>
+            </trim>
+            )
+        </where>
     </select>
 </mapper>

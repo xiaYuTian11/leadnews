@@ -3,10 +3,10 @@ package com.heima.article.test;
 import com.heima.article.ArticleJarApplication;
 import com.heima.article.service.AppArticleService;
 import com.heima.common.article.constans.ArticleConstans;
+import com.heima.model.article.dtos.ArticleHomeDto;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.user.pojos.ApUser;
 import com.heima.utils.threadlocal.AppThreadLocalUtils;
-import org.apache.ibatis.io.ResolverUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +23,9 @@ public class ArticleTest {
     @Test
     public void testArticle(){
         ApUser apUser = new ApUser();
-        apUser.setId(2104l);
+        apUser.setId(1L);
         AppThreadLocalUtils.setUser(apUser);
-        ResponseResult result = appArticleService.load(null, ArticleConstans.LOADTYPE_LOAD_MORE);
+        ResponseResult result = appArticleService.load(ArticleConstans.LOADTYPE_LOAD_MORE, new ArticleHomeDto());
         System.out.println(result.getData());
     }
 }

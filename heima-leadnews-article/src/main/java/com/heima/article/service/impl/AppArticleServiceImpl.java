@@ -10,97 +10,82 @@ import com.heima.model.mappers.app.ApUserArticleListMapper;
 import com.heima.model.user.pojos.ApUser;
 import com.heima.model.user.pojos.ApUserArticleList;
 import com.heima.utils.threadlocal.AppThreadLocalUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
 
+
 @Service
-@SuppressWarnings("all")
 public class AppArticleServiceImpl implements AppArticleService {
 
-    private static final short MAX_PAGE_SIZE = 50;
+
+    private static final int MAX_PAGE_SIZE = 50;
+
+    @Autowired
+    private ApArticleMapper apArticleMapper;
+    @Autowired
+    private ApUserArticleListMapper apUserArticleListMapper;
 
     @Override
-    public ResponseResult load(ArticleHomeDto dto, Short type) {
-        //参数校验
-        if(dto ==null ){
-            dto = new ArticleHomeDto();
-        }
-        //时间校验
-        if(dto.getMaxBehotTime()==null){
-            dto.setMaxBehotTime(new Date());
-        }
-
-        if(dto.getMinBehotTime()==null){
-            dto.setMinBehotTime(new Date());
-        }
-
-        //分页参数的校验
+    public ResponseResult load(Short type, ArticleHomeDto dto) {
+        ApUser user = AppThreadLocalUtils.getUser();
         Integer size = dto.getSize();
-        if(size==null || size <= 0){
+        String tag = dto.getTag();
+        // 分页参数校验
+        if (size == null || size <= 0) {
             size = 20;
         }
         size = Math.min(size,MAX_PAGE_SIZE);
         dto.setSize(size);
-
-        //文章频道参数校验
-        if(StringUtils.isEmpty(dto.getTag())){
+        //  类型参数校验
+        if (!type.equals(ArticleConstans.LOADTYPE_LOAD_MORE) && !type.equals(ArticleConstans.LOADTYPE_LOAD_NEW))
+            type = ArticleConstans.LOADTYPE_LOAD_MORE;
+        // 文章频道参数验证
+        if (StringUtils.isEmpty(tag)) {
             dto.setTag(ArticleConstans.DEFAULT_TAG);
         }
-
-        //类型参数校验
-        if(!type.equals(ArticleConstans.LOADTYPE_LOAD_MORE)&&!type.equals(ArticleConstans.LOADTYPE_LOAD_NEW)){
-            type = ArticleConstans.LOADTYPE_LOAD_MORE;
+        // 最大时间处理
+        if(dto.getMaxBehotTime()==null){
+            dto.setMaxBehotTime(new Date());
         }
-
-        //获取用户的信息
-        ApUser user = AppThreadLocalUtils.getUser();
-
-        //判断用户是否存在
-        if(user != null){
-            //存在 已登录 加载推荐的文章
-            List<ApArticle> apArticleList = getUserArticle(user,dto,type);
-            return ResponseResult.okResult(apArticleList);
+        // 最小时间处理
+        if(dto.getMinBehotTime()==null){
+            dto.setMinBehotTime(new Date());
+        }
+        // 数据加载
+        if(user!=null){
+            return ResponseResult.okResult(getUserArticle(user,dto,type));
         }else{
-            //不存在 未登录，加载默认的文章
-            List<ApArticle> apArticles = getDefaultArticle(dto,type);
-            return ResponseResult.okResult(apArticles);
+            return ResponseResult.okResult(getDefaultArticle(dto,type));
         }
-
     }
 
-    @Autowired
-    private ApArticleMapper apArticleMapper;
-
     /**
-     * 加载默认的文章信息
-     * @param dto
-     * @param type
+     * 用户未登陆加载默认的文章
+     * @param dto 查询参数
+     * @param type 是向上刷新还是向下刷新
      * @return
      */
     private List<ApArticle> getDefaultArticle(ArticleHomeDto dto, Short type) {
         return apArticleMapper.loadArticleListByLocation(dto,type);
     }
 
-    @Autowired
-    private ApUserArticleListMapper apUserArticleListMapper;
-
     /**
-     * 先从用户的推荐表中查找文章信息，如果没有再从默认文章信息获取数据
-     * @param user
-     * @param dto
-     * @param type
-     * @return
+     * 根据用户信息获取推荐文章列表
+     * @param user 用户对象
+     * @param dto 查询参数
+     * @param type 是向上刷新还是向下刷新
+     * @return 文章列表
      */
     private List<ApArticle> getUserArticle(ApUser user, ArticleHomeDto dto, Short type) {
-        List<ApUserArticleList> list = apUserArticleListMapper.loadArticleIdListByUser(user,dto,type);
+        List<ApUserArticleList> list = apUserArticleListMapper.loadArticleIdListByUser(user, dto, type);
         if(!list.isEmpty()){
             return apArticleMapper.loadArticleListByIdList(list);
-        }else{
-            return getDefaultArticle(dto,type);
+        } else {
+            return this.getDefaultArticle(dto,type);
         }
     }
 }

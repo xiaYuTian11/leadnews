@@ -18,18 +18,18 @@
   </sql>
 
     <select id="loadArticleIdListByUser" resultMap="BaseResultMap">
-        select * from ap_user_article_list
+        select <include refid="Base_Column_List" /> from ap_user_article_list
         <where>
-            user_id = #{user.id} and is_show = 0 and is_read = 0
+            user_id=#{user.id} and is_show=0 and is_read=0
+            <!-- loadmore -->
             <if test="type != null and type == 1">
-                and recommend_time <![CDATA[<]]>  #{dto.minBehotTime}
+                and recommend_time <![CDATA[<]]> #{dto.minBehotTime}
             </if>
             <if test="type != null and type == 2">
-                and recommend_time <![CDATA[>]]>  #{dto.maxBehotTime}
+                and recommend_time <![CDATA[>]]> #{dto.maxBehotTime}
             </if>
-
             <if test="dto.tag != '__all__'">
-               and channel_id = #{dto.tag}
+                and channel_id = #{dto.tag}
             </if>
         </where>
         limit #{dto.size}

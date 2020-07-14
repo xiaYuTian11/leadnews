@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
 @RestController
 @RequestMapping("/api/v1/article")
 public class ArticleHomeController implements ArticleHomeControllerApi {
@@ -17,21 +18,22 @@ public class ArticleHomeController implements ArticleHomeControllerApi {
     @Autowired
     private AppArticleService appArticleService;
 
+
     @Override
     @GetMapping("/load")
     public ResponseResult load(ArticleHomeDto dto) {
-        return appArticleService.load(dto, ArticleConstans.LOADTYPE_LOAD_MORE);
+        return appArticleService.load( ArticleConstans.LOADTYPE_LOAD_MORE, dto);
     }
 
     @Override
     @GetMapping("/loadmore")
     public ResponseResult loadMore(ArticleHomeDto dto) {
-        return appArticleService.load(dto,ArticleConstans.LOADTYPE_LOAD_MORE);
+        return appArticleService.load( ArticleConstans.LOADTYPE_LOAD_MORE, dto);
     }
 
     @Override
     @GetMapping("/loadnew")
     public ResponseResult loadNew(ArticleHomeDto dto) {
-        return appArticleService.load(dto,ArticleConstans.LOADTYPE_LOAD_NEW);
+        return appArticleService.load( ArticleConstans.LOADTYPE_LOAD_NEW, dto);
     }
 }
